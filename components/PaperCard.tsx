@@ -1,27 +1,46 @@
+
 import React, { useState } from 'react';
-import { Paper } from '../types';
-import { ChevronDown, ExternalLink, Calendar, Users, Database } from 'lucide-react';
+import { Paper, Language } from '../types';
+import { ChevronDown, ExternalLink, Calendar, Users } from 'lucide-react';
+import { translations } from '../utils/translations';
 
 interface PaperCardProps {
   paper: Paper;
+  lang: Language;
 }
 
-export const PaperCard: React.FC<PaperCardProps> = ({ paper }) => {
+export const PaperCard: React.FC<PaperCardProps> = ({ paper, lang }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const t = translations[lang];
 
-  // Format date to YYYY-MM-DD (handle potential invalid dates gracefully)
+  // Format date based on language
   let formattedDate = paper.published;
   try {
-     formattedDate = new Date(paper.published).toLocaleDateString('zh-TW', {
+    const locale = lang === 'zh' ? 'zh-TW' : 'en-US';
+     formattedDate = new Date(paper.published).toLocaleDateString(locale, {
       year: 'numeric',
       month: '2-digit',
       day: '2-digit'
     });
   } catch (e) {
-    // fallback if date parsing fails
+    // fallback
   }
 
-  const isArxiv = paper.source === 'arXiv';
+  // Determine badge style
+  let badgeStyle = '';
+  let badgeText = paper.source;
+
+  switch (paper.source) {
+    case 'arXiv':
+      badgeStyle = 'bg-red-900/30 text-red-400 border-red-900/50';
+      break;
+    case 'Semantic Scholar':
+      badgeStyle = 'bg-blue-900/30 text-blue-400 border-blue-900/50';
+      break;
+    case 'Hedge Fund Notes':
+      badgeStyle = 'bg-purple-900/30 text-purple-400 border-purple-900/50';
+      break;
+  }
 
   return (
     <div className="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden hover:border-slate-600 transition-colors duration-200">
@@ -30,9 +49,9 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper }) => {
         className="w-full text-left p-5 flex items-start justify-between gap-4 focus:outline-none focus:bg-slate-700/50"
       >
         <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${isArxiv ? 'bg-red-900/30 text-red-400 border-red-900/50' : 'bg-blue-900/30 text-blue-400 border-blue-900/50'}`}>
-               {paper.source}
+          <div className="flex items-center gap-3 mb-2 flex-wrap">
+            <div className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold border uppercase tracking-wide ${badgeStyle}`}>
+               {badgeText}
             </div>
             <div className="flex items-center gap-2 text-xs text-slate-400 font-mono">
               <Calendar className="w-3 h-3" />
@@ -61,7 +80,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper }) => {
       >
         <div className="p-5 pt-0 border-t border-slate-700/50 bg-slate-800/50">
           <div className="mt-4">
-             <h4 className="text-sm font-semibold text-slate-300 mb-2">摘要 (Summary)</h4>
+             <h4 className="text-sm font-semibold text-slate-300 mb-2">{t.summary}</h4>
              <p className="text-slate-400 text-sm leading-relaxed text-justify">
                {paper.summary}
              </p>
@@ -74,7 +93,7 @@ export const PaperCard: React.FC<PaperCardProps> = ({ paper }) => {
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white text-sm font-medium rounded-lg transition-colors border border-slate-600"
             >
-              閱讀全文 ({isArxiv ? 'arXiv' : 'External'})
+              {t.readFull} ({paper.source === 'arXiv' ? 'arXiv' : 'Web'})
               <ExternalLink className="w-4 h-4" />
             </a>
           </div>
