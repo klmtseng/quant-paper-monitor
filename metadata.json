@@ -1,0 +1,5 @@
+{
+  "name": "Quant Alpha Monitor",
+  "description": "A real-time dashboard monitoring Quantitative Finance (q-fin) research papers from arXiv.",
+  "requestFramePermissions": []
+}
